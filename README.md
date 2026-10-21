@@ -37,8 +37,8 @@ Lưu ý: Các chức năng đặt hàng, thanh toán và lưu thông tin trong p
 ## 5. Cách chạy
 
 1. Mở thư mục dự án bằng Visual Studio Code.
-2. Kiểm tra cấu trúc thư mục, bảo đảm có file `giohang.html` và thư mục `css` chứa file `style.css`.
-3. Mở file `giohang.html` bằng trình duyệt web.
+2. Kiểm tra cấu trúc thư mục, bảo đảm có file `index.html` và thư mục `css` chứa file `style.css`.
+3. Mở file `index.html` bằng trình duyệt web.
 4. Thử các chức năng trên giao diện:
    - Nhấn vào khu vực mã giảm giá để mở hoặc thu gọn danh sách voucher.
    - Chọn voucher để kiểm tra thông tin giảm giá.
