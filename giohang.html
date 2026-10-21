@@ -1,0 +1,831 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán | Watsons Việt Nam</title>
+
+    <!-- Kết nối file CSS riêng -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- 🟨 ĐÃ CHỈNH SỬA: CSS cho dòng voucher thu gọn và nút số lượng -->
+    <style>
+        .voucher-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding: 12px 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .voucher-toggle:hover {
+            background: #fafafa;
+        }
+
+        #voucherToggleArrow {
+            transition: transform 0.2s ease;
+        }
+
+        .voucher-toggle[aria-expanded="true"] #voucherToggleArrow {
+            transform: rotate(180deg);
+        }
+
+        .quantity-control {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 28px;
+            border: none;
+            background: #f6f6f6;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .quantity-btn:hover {
+            background: #e9e9e9;
+        }
+
+        .quantity-value {
+            min-width: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .quantity-btn {
+                width: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh thông báo ưu đãi -->
+    <div class="promo-bar">
+        Ưu đãi dành cho thành viên Watsons
+    </div>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="#">watsons<span>.</span></a>
+            <strong class="secure-title">🔒 Thanh toán an toàn</strong>
+            <a class="help-link" href="#support">Trợ giúp</a>
+        </div>
+    </header>
+
+    <!-- Tiến trình thanh toán -->
+    <nav class="container progress">
+        <div class="progress-step done">
+            <span>1</span>
+            <b>Giỏ hàng</b>
+        </div>
+        <i></i>
+        <div class="progress-step active">
+            <span>2</span>
+            <b>Thanh toán</b>
+        </div>
+        <i></i>
+        <div class="progress-step">
+            <span>3</span>
+            <b>Hoàn tất</b>
+        </div>
+    </nav>
+
+    <main class="container checkout-layout">
+
+        <div class="checkout-main">
+
+            <!-- 1. Thông tin nhận hàng thu gọn -->
+            <section class="panel">
+                <div class="panel-heading">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h1>Thông tin nhận hàng</h1>
+                        <p>Kiểm tra địa chỉ trước khi đặt hàng.</p>
+                    </div>
+                </div>
+
+                <!-- Thông tin hiển thị mặc định -->
+                <div class="address-summary" id="addressSummary">
+                    <div class="pin-icon">⌖</div>
+
+                    <div class="address-copy">
+                        <div class="address-meta">
+                            <strong id="displayName">Nguyễn Văn A</strong>
+                            <span id="displayPhone">0901234567</span>
+                            <span class="default-tag">Mặc định</span>
+                        </div>
+
+                        <p id="displayAddress">
+                            123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh
+                        </p>
+                    </div>
+
+                    <button type="button" class="text-button"
+                            id="changeAddress">
+                        Thay đổi
+                    </button>
+                </div>
+
+                <!-- Biểu mẫu chỉ hiện khi bấm Thay đổi -->
+                <form id="deliveryForm" class="address-form" hidden>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="fullname">Họ và tên *</label>
+                            <input id="fullname" type="text"
+                                   value="Nguyễn Văn A" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="phone">Số điện thoại *</label>
+                            <input id="phone" type="tel"
+                                   value="0901234567" required>
+                        </div>
+
+                        <div class="form-field full">
+                            <label for="address">Địa chỉ nhận hàng *</label>
+                            <input id="address" type="text"
+                                   value="123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"
+                                   required>
+                        </div>
+
+                        <div class="form-field full">
+                            <label for="email">Email (không bắt buộc)</label>
+                            <input id="email" type="email"
+                                   placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="button button-secondary"
+                                id="cancelAddress">
+                            Hủy
+                        </button>
+
+                        <button type="submit" class="button button-primary">
+                            Lưu địa chỉ
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 2. Phương thức nhận hàng -->
+            <section class="panel">
+                <div class="panel-heading">
+                    <span class="step-number">2</span>
+                    <div>
+                        <h2>Phương thức nhận hàng</h2>
+                        <p>Chọn cách nhận đơn hàng phù hợp.</p>
+                    </div>
+                </div>
+
+                <label class="select-option selected" id="homeOption">
+                    <input type="radio" name="delivery"
+                           value="home" checked>
+
+                    <span class="option-copy">
+                        <strong>Giao hàng tận nhà</strong>
+                        <small>Giao đến địa chỉ đã lưu</small>
+                    </span>
+
+                    <strong class="option-value">25.000đ</strong>
+                </label>
+
+                <label class="select-option" id="storeOption">
+                    <input type="radio" name="delivery" value="store">
+
+                    <span class="option-copy">
+                        <strong>Nhận hàng tại cửa hàng</strong>
+                        <small>Phí nhận hàng minh họa: miễn phí</small>
+                    </span>
+
+                    <strong class="option-value">Miễn phí</strong>
+                </label>
+            </section>
+
+            <!-- 3. Mã giảm giá -->
+            <section class="panel">
+                <div class="panel-heading">
+                    <span class="step-number">3</span>
+                    <div>
+                        <h2>Mã giảm giá & ưu đãi</h2>
+                        <p>Chọn một mã phù hợp với đơn hàng.</p>
+                    </div>
+                </div>
+
+                <!-- 🟨 ĐÃ CHỈNH SỬA: Nhấn vào dòng này để mở danh sách voucher -->
+                <button type="button"
+                        class="voucher-toggle"
+                        id="voucherToggle"
+                        aria-expanded="false"
+                        aria-controls="voucherContent">
+                    <span id="voucherToggleText">Chọn mã giảm giá</span>
+                    <span id="voucherToggleArrow">⌄</span>
+                </button>
+
+                <!-- 🟨 ĐÃ CHỈNH SỬA: Toàn bộ nội dung voucher được thu gọn mặc định -->
+                <div id="voucherContent" hidden>
+
+                    <!-- Nhập mã giảm giá thủ công -->
+                    <div class="coupon-entry">
+                        <label class="visually-hidden" for="couponInput">
+                            Nhập mã giảm giá
+                        </label>
+
+                        <input id="couponInput" type="text"
+                               placeholder="Nhập mã giảm giá">
+
+                        <button type="button" class="button button-outline"
+                                id="applyCode">
+                            Áp dụng mã
+                        </button>
+                    </div>
+
+                    <p class="status-message" id="couponMessage"
+                       role="status" aria-live="polite">
+                        Chọn một ưu đãi bên dưới hoặc nhập mã giảm giá.
+                    </p>
+
+                    <div class="voucher-heading">
+                        <h3>Ưu đãi dành cho bạn</h3>
+                        <span>3 mã minh họa</span>
+                    </div>
+
+                    <!-- Voucher 1 -->
+                    <article class="voucher-item">
+                        <div class="voucher-mark">%</div>
+
+                        <div class="voucher-copy">
+                            <strong>BEAUTY20</strong>
+                            <p>Giảm 20%, tối đa 80.000đ</p>
+                            <small>Áp dụng cho đơn từ 300.000đ</small>
+                        </div>
+
+                        <button type="button" class="voucher-button"
+                                data-voucher="BEAUTY20">
+                            Chọn mã
+                        </button>
+                    </article>
+
+                    <!-- Voucher 2 -->
+                    <article class="voucher-item">
+                        <div class="voucher-mark">−đ</div>
+
+                        <div class="voucher-copy">
+                            <strong>SAVE30</strong>
+                            <p>Giảm trực tiếp 30.000đ</p>
+                            <small>Áp dụng cho đơn từ 200.000đ</small>
+                        </div>
+
+                        <button type="button" class="voucher-button"
+                                data-voucher="SAVE30">
+                            Chọn mã
+                        </button>
+                    </article>
+
+                    <!-- Voucher 3 -->
+                    <article class="voucher-item">
+                        <div class="voucher-mark">↗</div>
+
+                        <div class="voucher-copy">
+                            <strong>FREESHIP</strong>
+                            <p>Miễn phí vận chuyển</p>
+                            <small>Áp dụng cho đơn từ 150.000đ</small>
+                        </div>
+
+                        <button type="button" class="voucher-button"
+                                data-voucher="FREESHIP">
+                            Chọn mã
+                        </button>
+                    </article>
+
+                    <button type="button" id="removeVoucher"
+                            class="remove-voucher" hidden>
+                        Bỏ mã đang áp dụng
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. Phương thức thanh toán -->
+            <section class="panel">
+                <div class="panel-heading">
+                    <span class="step-number">4</span>
+                    <div>
+                        <h2>Phương thức thanh toán</h2>
+                        <p>Chọn phương thức thanh toán cho đơn hàng.</p>
+                    </div>
+                </div>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="cod" checked>
+                    <span>
+                        <strong>Thanh toán khi nhận hàng (COD)</strong>
+                        <small>Thanh toán khi nhận sản phẩm</small>
+                    </span>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="bank">
+                    <span>
+                        <strong>Thẻ ATM / Thẻ tín dụng</strong>
+                        <small>Chưa kết nối cổng thanh toán thật</small>
+                    </span>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="wallet">
+                    <span>
+                        <strong>Ví điện tử</strong>
+                        <small>Chưa kết nối ví điện tử thật</small>
+                    </span>
+                </label>
+            </section>
+        </div>
+
+        <!-- Cột tóm tắt đơn hàng -->
+        <aside class="order-column">
+            <section class="summary-panel">
+                <h2>
+                    Đơn hàng của bạn
+                    <span class="item-count" id="itemCount">3 sản phẩm</span>
+                </h2>
+
+                <!-- 🟨 ĐÃ CHỈNH SỬA: Sản phẩm 1, thêm nút tăng giảm số lượng -->
+                <div class="summary-product"
+                     data-product
+                     data-unit-price="150000">
+
+                    <img src="images/sua-rua-mat.jpg"
+                         alt="Sữa rửa mặt"
+                         class="product-image"
+                         onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+
+                    <div class="product-fallback" hidden>Ảnh</div>
+
+                    <div class="summary-product-info">
+                        <strong>Sữa rửa mặt</strong>
+                        <small>Chăm sóc da</small>
+
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn"
+                                    data-action="decrease"
+                                    aria-label="Giảm số lượng sữa rửa mặt">−</button>
+                            <span class="quantity-value" id="qty1">1</span>
+                            <button type="button" class="quantity-btn"
+                                    data-action="increase"
+                                    aria-label="Tăng số lượng sữa rửa mặt">+</button>
+                        </div>
+                    </div>
+
+                    <strong class="product-cost">150.000đ</strong>
+                </div>
+
+                <!-- 🟨 ĐÃ CHỈNH SỬA: Sản phẩm 2, thêm nút tăng giảm số lượng -->
+                <div class="summary-product"
+                     data-product
+                     data-unit-price="127000">
+
+                    <img src="images/dau-goi.jpg"
+                         alt="Dầu gội chăm sóc tóc"
+                         class="product-image"
+                         onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+
+                    <div class="product-fallback" hidden>Ảnh</div>
+
+                    <div class="summary-product-info">
+                        <strong>Dầu gội chăm sóc tóc</strong>
+                        <small>Chăm sóc tóc</small>
+
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn"
+                                    data-action="decrease"
+                                    aria-label="Giảm số lượng dầu gội">−</button>
+                            <span class="quantity-value" id="qty2">1</span>
+                            <button type="button" class="quantity-btn"
+                                    data-action="increase"
+                                    aria-label="Tăng số lượng dầu gội">+</button>
+                        </div>
+                    </div>
+
+                    <strong class="product-cost">127.000đ</strong>
+                </div>
+
+                <!-- 🟨 ĐÃ CHỈNH SỬA: Sản phẩm 3, thêm nút tăng giảm số lượng -->
+                <div class="summary-product"
+                     data-product
+                     data-unit-price="100000">
+
+                    <img src="images/kem-duong-da.jpg"
+                         alt="Kem dưỡng da"
+                         class="product-image"
+                         onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+
+                    <div class="product-fallback" hidden>Ảnh</div>
+
+                    <div class="summary-product-info">
+                        <strong>Kem dưỡng da</strong>
+                        <small>Dưỡng da</small>
+
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn"
+                                    data-action="decrease"
+                                    aria-label="Giảm số lượng kem dưỡng da">−</button>
+                            <span class="quantity-value" id="qty3">1</span>
+                            <button type="button" class="quantity-btn"
+                                    data-action="increase"
+                                    aria-label="Tăng số lượng kem dưỡng da">+</button>
+                        </div>
+                    </div>
+
+                    <strong class="product-cost">100.000đ</strong>
+                </div>
+
+                <div class="summary-separator"></div>
+
+                <div class="summary-row">
+                    <span>Tạm tính</span>
+                    <strong id="subtotal">377.000đ</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Phí vận chuyển</span>
+                    <strong id="shipping">0đ</strong>
+                </div>
+
+                <div class="summary-row discount-row">
+                    <span>Giảm giá</span>
+                    <strong id="discount">0đ</strong>
+                </div>
+
+                <div class="summary-separator"></div>
+
+                <div class="summary-total">
+                    <span>Tổng thanh toán</span>
+                    <strong id="total">377.000đ</strong>
+                </div>
+
+                <p class="tax-note">
+                    Giá và sản phẩm là dữ liệu minh họa.
+                </p>
+
+                <button type="button" class="place-order" id="placeOrder">
+                    Xác nhận đặt hàng
+                </button>
+
+                <p class="secure-note">
+                    🔒 Giao diện mô phỏng, chưa kết nối thanh toán thật
+                </p>
+
+                <p class="status-message" id="orderMessage"
+                   role="status" aria-live="polite"></p>
+            </section>
+
+            <section class="support-panel" id="support">
+                <strong>Cần hỗ trợ?</strong>
+                <p>Kiểm tra thông tin trước khi xác nhận đơn hàng.</p>
+            </section>
+        </aside>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <strong>watsons<span>.</span></strong>
+            <p>Giao diện thanh toán mô phỏng phục vụ bài tập thiết kế website.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript tích hợp trực tiếp trong HTML -->
+    <script>
+        const vouchers = {
+            BEAUTY20: {
+                type: "percent",
+                value: 20,
+                maxDiscount: 80000,
+                minOrder: 300000
+            },
+            SAVE30: {
+                type: "fixed",
+                value: 30000,
+                minOrder: 200000
+            },
+            FREESHIP: {
+                type: "shipping",
+                value: 25000,
+                minOrder: 150000
+            }
+        };
+
+        let selectedVoucher = null;
+
+        // Định dạng tiền Việt Nam
+        function formatMoney(amount) {
+            return Math.round(amount).toLocaleString("vi-VN") + "đ";
+        }
+
+        // 🟨 ĐÃ CHỈNH SỬA: Tính tổng tiền theo số lượng hiện tại
+        function calculateSubtotal() {
+            let total = 0;
+
+            document.querySelectorAll("[data-product]").forEach(product => {
+                const price = Number(product.dataset.unitPrice);
+                const quantity = Number(
+                    product.querySelector(".quantity-value").textContent
+                ) || 1;
+
+                total += price * quantity;
+            });
+
+            return total;
+        }
+
+        // Tính phí vận chuyển
+        function calculateShipping(subtotal) {
+            const method = document.querySelector(
+                'input[name="delivery"]:checked'
+            ).value;
+
+            // Quy tắc minh họa: miễn phí từ 249.000đ hoặc nhận tại cửa hàng
+            if (method === "store" || subtotal >= 249000) {
+                return 0;
+            }
+
+            return 25000;
+        }
+
+        // 🟨 ĐÃ CHỈNH SỬA: Cập nhật số lượng, thành tiền và tổng đơn hàng
+        function updateTotals() {
+            const subtotal = calculateSubtotal();
+            let shipping = calculateShipping(subtotal);
+            let discount = 0;
+
+            // Cập nhật thành tiền của từng sản phẩm
+            document.querySelectorAll("[data-product]").forEach(product => {
+                const price = Number(product.dataset.unitPrice);
+                const quantity = Number(
+                    product.querySelector(".quantity-value").textContent
+                ) || 1;
+
+                product.querySelector(".product-cost").textContent =
+                    formatMoney(price * quantity);
+            });
+
+            // Tính giảm giá theo voucher đang chọn
+            if (selectedVoucher) {
+                const voucher = vouchers[selectedVoucher];
+
+                if (subtotal < voucher.minOrder) {
+                    selectedVoucher = null;
+
+                    document.getElementById("couponMessage").textContent =
+                        "Đơn hàng chưa đạt điều kiện áp dụng mã.";
+
+                    document.getElementById("voucherToggleText").textContent =
+                        "Chọn mã giảm giá";
+                } else if (voucher.type === "percent") {
+                    discount = Math.min(
+                        subtotal * voucher.value / 100,
+                        voucher.maxDiscount
+                    );
+                } else if (voucher.type === "fixed") {
+                    discount = voucher.value;
+                } else if (voucher.type === "shipping") {
+                    shipping = 0;
+                }
+            }
+
+            document.getElementById("subtotal").textContent =
+                formatMoney(subtotal);
+
+            document.getElementById("shipping").textContent =
+                formatMoney(shipping);
+
+            document.getElementById("discount").textContent =
+                formatMoney(discount);
+
+            document.getElementById("total").textContent =
+                formatMoney(subtotal + shipping - discount);
+
+            // Cập nhật tổng số lượng sản phẩm
+            let itemCount = 0;
+
+            document.querySelectorAll(".quantity-value").forEach(quantity => {
+                itemCount += Number(quantity.textContent) || 0;
+            });
+
+            document.getElementById("itemCount").textContent =
+                itemCount + " sản phẩm";
+
+            // Cập nhật trạng thái nút voucher
+            document.querySelectorAll("[data-voucher]").forEach(button => {
+                const active = button.dataset.voucher === selectedVoucher;
+
+                button.textContent = active ? "Đã chọn" : "Chọn mã";
+                button.classList.toggle("active", active);
+                button.setAttribute("aria-pressed", String(active));
+            });
+
+            document.getElementById("removeVoucher").hidden =
+                !selectedVoucher;
+        }
+
+        // Chọn hoặc nhập mã giảm giá
+        function applyVoucher(code) {
+            code = code.trim().toUpperCase();
+
+            const voucher = vouchers[code];
+            const message = document.getElementById("couponMessage");
+
+            if (!voucher) {
+                message.textContent =
+                    "Mã không hợp lệ. Vui lòng kiểm tra lại.";
+                return;
+            }
+
+            // 🟨 ĐÃ CHỈNH SỬA: Kiểm tra theo tổng tiền động
+            if (calculateSubtotal() < voucher.minOrder) {
+                message.textContent =
+                    "Đơn hàng chưa đạt mức tối thiểu để sử dụng mã " + code + ".";
+                return;
+            }
+
+            selectedVoucher = code;
+            document.getElementById("couponInput").value = code;
+
+            // 🟨 ĐÃ CHỈNH SỬA: Hiển thị mã đang áp dụng ngay trên dòng thu gọn
+            document.getElementById("voucherToggleText").textContent =
+                "Đang áp dụng mã: " + code;
+
+            message.textContent =
+                "Đã áp dụng mã " + code + " thành công.";
+
+            updateTotals();
+        }
+
+        // Bấm nút chọn voucher
+        document.querySelectorAll("[data-voucher]").forEach(button => {
+            button.addEventListener("click", () => {
+                applyVoucher(button.dataset.voucher);
+            });
+        });
+
+        // Bấm nút áp dụng mã nhập thủ công
+        document.getElementById("applyCode").addEventListener("click", () => {
+            applyVoucher(document.getElementById("couponInput").value);
+        });
+
+        // Nhấn Enter để áp dụng mã
+        document.getElementById("couponInput").addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("applyCode").click();
+            }
+        });
+
+        // Bỏ mã giảm giá đang chọn
+        document.getElementById("removeVoucher").addEventListener("click", () => {
+            selectedVoucher = null;
+            document.getElementById("couponInput").value = "";
+
+            // 🟨 ĐÃ CHỈNH SỬA: Khôi phục nội dung dòng voucher
+            document.getElementById("voucherToggleText").textContent =
+                "Chọn mã giảm giá";
+
+            document.getElementById("couponMessage").textContent =
+                "Bạn chưa áp dụng mã giảm giá.";
+
+            updateTotals();
+        });
+
+        // 🟨 ĐÃ CHỈNH SỬA: Mở hoặc thu gọn danh sách voucher
+        document.getElementById("voucherToggle").addEventListener("click", () => {
+            const content = document.getElementById("voucherContent");
+            const toggle = document.getElementById("voucherToggle");
+
+            const expanded =
+                toggle.getAttribute("aria-expanded") === "true";
+
+            toggle.setAttribute("aria-expanded", String(!expanded));
+            content.hidden = expanded;
+        });
+
+        // 🟨 ĐÃ CHỈNH SỬA: Xử lý nút tăng/giảm số lượng sản phẩm
+        document.querySelectorAll(".quantity-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const control = button.closest(".quantity-control");
+                const quantity = control.querySelector(".quantity-value");
+
+                let value = Number(quantity.textContent) || 1;
+
+                if (button.dataset.action === "increase") {
+                    value++;
+                } else {
+                    value = Math.max(1, value - 1);
+                }
+
+                quantity.textContent = value;
+
+                // Cập nhật lại tất cả số tiền sau khi thay đổi số lượng
+                updateTotals();
+            });
+        });
+
+        // Thay đổi phương thức nhận hàng
+        document.querySelectorAll('input[name="delivery"]').forEach(input => {
+            input.addEventListener("change", () => {
+                document.getElementById("homeOption").classList.toggle(
+                    "selected",
+                    input.value === "home" && input.checked
+                );
+
+                document.getElementById("storeOption").classList.toggle(
+                    "selected",
+                    input.value === "store" && input.checked
+                );
+
+                updateTotals();
+            });
+        });
+
+        // Thu gọn và mở biểu mẫu địa chỉ
+        const addressSummary = document.getElementById("addressSummary");
+        const deliveryForm = document.getElementById("deliveryForm");
+
+        let savedAddress = {
+            name: document.getElementById("fullname").value,
+            phone: document.getElementById("phone").value,
+            address: document.getElementById("address").value
+        };
+
+        document.getElementById("changeAddress").addEventListener("click", () => {
+            deliveryForm.hidden = false;
+            addressSummary.hidden = true;
+        });
+
+        // Hủy chỉnh sửa địa chỉ
+        document.getElementById("cancelAddress").addEventListener("click", () => {
+            document.getElementById("fullname").value = savedAddress.name;
+            document.getElementById("phone").value = savedAddress.phone;
+            document.getElementById("address").value = savedAddress.address;
+
+            deliveryForm.hidden = true;
+            addressSummary.hidden = false;
+        });
+
+        // Lưu thông tin mới lên giao diện
+        deliveryForm.addEventListener("submit", event => {
+            event.preventDefault();
+
+            savedAddress = {
+                name: document.getElementById("fullname").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                address: document.getElementById("address").value.trim()
+            };
+
+            document.getElementById("displayName").textContent =
+                savedAddress.name;
+
+            document.getElementById("displayPhone").textContent =
+                savedAddress.phone;
+
+            document.getElementById("displayAddress").textContent =
+                savedAddress.address;
+
+            deliveryForm.hidden = true;
+            addressSummary.hidden = false;
+        });
+
+        // Nút đặt hàng chỉ mô phỏng
+        document.getElementById("placeOrder").addEventListener("click", () => {
+            const message = document.getElementById("orderMessage");
+
+            if (!deliveryForm.hidden) {
+                message.textContent =
+                    "Vui lòng lưu hoặc hủy thay đổi địa chỉ trước khi tiếp tục.";
+                return;
+            }
+
+            message.textContent =
+                "Thông tin đã sẵn sàng trong bản mô phỏng. Chức năng đặt hàng thật chưa được kết nối.";
+        });
+
+        // Tính tổng khi trang vừa tải
+        updateTotals();
+    </script>
+</body>
+</html>
